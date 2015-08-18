@@ -3,8 +3,6 @@ module Highlight.Formats
 import Highlight.Regions
 import Control.Monad.State
 
--- Right now, the only format is LaTeX, 'cause that's what I myself need :)
-
 ||| A description of how to annotate a source file to output to a particular format.
 public
 record Format where
@@ -177,5 +175,4 @@ highlight fmt file hls = preamble fmt ++
                                       modify (record {colNo = 0})
                                       doOutput "\n"
                                       highlight' lines (unpack l)
-        
- 
+

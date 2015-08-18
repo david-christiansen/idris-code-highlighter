@@ -18,9 +18,11 @@ getFilename = case !getArgs of
 
 main : IO ()
 main =
-   do (Just fn) <- getFilename
+   do (Just fn') <- getFilename
          | _ => usage
-      putStrLn fn
+      let fn = if isSuffixOf ".idh" fn'
+                 then pack (reverse (drop 4 (reverse (unpack fn'))))
+                 else fn'
       let idr = fn ++ ".idr"
       let idh = fn ++ ".idh"
       let tex = fn ++ ".tex"
@@ -34,11 +36,8 @@ main =
              fwrite texFile (highlight LaTeX !(readFile idr) hls)
              closeFile texFile
              htmlFile <- openFile html Write
-             putStrLn $ highlight HTML !(readFile idr) hls
+             fwrite htmlFile (highlight HTML !(readFile idr) hls)
              closeFile htmlFile
         Right meta =>
           printLn meta
-      -- repl "> " (\input => case parse expr input of
-      --                        Left err => "Error: " ++ err
-      --                        Right expr => show expr)
 
