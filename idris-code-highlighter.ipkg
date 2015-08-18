@@ -1,0 +1,12 @@
+package idrishighlighter
+
+-- Idris Code Highlighter
+-- by David Christiansen
+-- Generate fancy highlighted source based on Idris's output
+
+opts = "-p lightyear -p effects --highlight --typeintype "
+sourcedir = src
+modules = Highlight.Main, Highlight.Parser, Highlight.Regions
+
+main = Highlight.Main
+executable = idrishl
