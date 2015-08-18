@@ -10,3 +10,7 @@ To use it, pass it the base name of the `.idr` and `.idh` files (that is, withou
 To build it, use `idris --build idris-code-highlighter.ipkg`. It needs [Lightyear](https://github.com/ziman/lightyear) to be installed already.  You'll need a recent Git version of Idris for this to work well.
 
 For a demo, try the `hl-me.sh` script. It generates highlighted versions of the program's own source.
+
+Development
+-----------
+To get started, it might be worth taking a look at what I think are good first projects: there is a "Low-Hanginging Fruit" tag in the issue tracker. If you have any questions, please don't hesitate to get in touch.
