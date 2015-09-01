@@ -4,7 +4,7 @@ package idrishighlighter
 -- by David Christiansen
 -- Generate fancy highlighted source based on Idris's output
 
-opts = "-p lightyear -p effects --highlight --typeintype "
+opts = "-p lightyear -p effects --highlight "
 sourcedir = src
 modules = Highlight.Main, Highlight.Parser, Highlight.Regions
 
