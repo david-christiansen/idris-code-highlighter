@@ -174,7 +174,8 @@ highlight fmt fileContents hls =
                                       closeAll line col fmt
                                       doOutput $ escape fmt c
                                       highlight' lines cs
-        highlight' (l::lines) [] = do closeAll (lineNo !get) (colNo !get) fmt
+        highlight' (l::lines) [] = do modify incCol
+                                      closeAll (lineNo !get) (colNo !get) fmt
                                       modify incLine
                                       modify (record {colNo = 0})
                                       doOutput "\n"
