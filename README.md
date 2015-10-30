@@ -9,6 +9,8 @@ To use it, pass it the base name of the `.idr` and `.idh` files (that is, withou
 
 To build it, use `idris --build idris-code-highlighter.ipkg`. It needs [Lightyear](https://github.com/ziman/lightyear) to be installed already.  You'll need a recent Git version of Idris for this to work well.
 
+Note that Idris highlighting information contains filenames relative to the source directory (specifically, the compiler's working directory while building). This means that you must run `idrishl` with the same working directory that Idris had when it was building, or else the filename information won't match and the highlighting will be rejected.
+
 For a demo, try the `hl-me.sh` script. It generates highlighted versions of the program's own source.
 
 Development
