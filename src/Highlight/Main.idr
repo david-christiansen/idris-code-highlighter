@@ -32,11 +32,12 @@ main =
         Left err => do putStrLn err
         Right (SList xs) =>
           do let hls = mkHls $ catMaybes $ map getRegionMeta xs
+             let realHls = sort (filter (\r => fileName r == idr) hls)
              texFile <- openFile tex Write
-             fwrite texFile (highlight LaTeX !(readFile idr) hls)
+             fwrite texFile (highlight LaTeX !(readFile idr) realHls)
              closeFile texFile
              htmlFile <- openFile html Write
-             fwrite htmlFile (highlight HTML !(readFile idr) hls)
+             fwrite htmlFile (highlight HTML !(readFile idr) realHls)
              closeFile htmlFile
         Right meta =>
           printLn meta

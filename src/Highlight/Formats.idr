@@ -3,6 +3,8 @@ module Highlight.Formats
 import Highlight.Regions
 import Control.Monad.State
 
+import Debug.Trace
+
 ||| A description of how to annotate a source file to output to a particular format.
 public
 record Format where
@@ -30,6 +32,7 @@ escapeL : Char -> String
 escapeL '{'  = "\\{"
 escapeL '}'  = "\\}"
 escapeL '\\' = "\\textbackslash{}"
+escapeL '~'  = "\\textasciitilde{}"
 escapeL c    = singleton c
 
 private total
@@ -130,36 +133,37 @@ doOutput str = do st <- get
 
 private
 openAll : (line, col : Integer) -> Format -> State HLState ()
-openAll line col fmt = 
-                   do hls <- highlights <$> get
-                      let (toOpen, notYet) = List.span (\hl => startLine hl < line ||
-                                                               (startLine hl == line &&
-                                                                startColumn hl <= col))
-                                                        hls
-                      traverse_ (doOutput . openTag fmt . metadata) toOpen
-                      st <- get
-                      put (record { highlights = notYet
-                                  , openHighlights = reverse toOpen ++ openHighlights st
-                                  } st)
+openAll line col fmt =
+    do hls <- highlights <$> get
+       let (toOpen, notYet) = List.span (\hl => startLine hl < line ||
+                                                (startLine hl == line &&
+                                                 startColumn hl <= col))
+                                         hls
+       traverse_ (doOutput . openTag fmt . metadata) toOpen
+       st <- get
+       put (record { highlights = notYet
+                   , openHighlights = reverse toOpen ++ openHighlights st
+                   } st)
 
 closeAll : (line, col : Integer) -> Format -> State HLState ()
-closeAll line col fmt = 
-                    do openHls <- openHighlights <$> get
-                       let (toClose, notYet) = span (\hl => endLine hl < line ||
-                                                          (endLine hl == line &&
-                                                           endColumn hl <= col))
-                                                    openHls
-                       traverse_ (doOutput . closeTag fmt . metadata) toClose
-                       st <- get
-                       put (record {openHighlights = notYet} st)
+closeAll line col fmt =
+    do openHls <- openHighlights <$> get
+       let (toClose, notYet) = span (\hl => endLine hl < line ||
+                                          (endLine hl == line &&
+                                           endColumn hl <= col))
+                                    openHls
+       traverse_ (doOutput . closeTag fmt . metadata) toClose
+       st <- get
+       put (record {openHighlights = notYet} st)
 
 
 ||| Apply highlighting to a source file for some output format
 public
 highlight : Format -> (fileContents : String) -> List (Region HighlightType) -> String
-highlight fmt file hls = preamble fmt ++
-                         concat (evalState (highlight' (split isNL file) []) (MkHlState 0 0 (sort hls) [] [])) ++
-                         postamble fmt
+highlight fmt fileContents hls =
+    preamble fmt ++
+    concat (evalState (highlight' (split isNL fileContents) []) (MkHlState 0 0 (sort hls) [] [])) ++
+    postamble fmt
   where highlight' : List String -> List Char -> State HLState (List String)
         highlight' [] [] = do traverse_ (doOutput . closeTag fmt . metadata) (openHighlights !get)
                               return (reverse (output !get))
