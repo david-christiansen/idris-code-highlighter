@@ -4,6 +4,7 @@ import Highlight.Regions
 
 import Lightyear.Core
 import Lightyear.Combinators
+import Lightyear.Char
 import Lightyear.Strings
 
 ||| The data format output by Idris's highlighting routines
