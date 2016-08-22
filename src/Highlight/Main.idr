@@ -27,18 +27,22 @@ main =
       let idh = fn ++ ".idh"
       let tex = fn ++ ".tex"
       let html = fn ++ ".html"
-      info <- readFile idh
+      Right info <- readFile idh
+        | Left err => printLn err
       case parse expr info of
         Left err => do putStrLn err
         Right (SList xs) =>
           do let hls = mkHls $ catMaybes $ map getRegionMeta xs
              let realHls = sort (filter (\r => fileName r == idr) hls)
-             texFile <- openFile tex Write
-             fwrite texFile (highlight LaTeX !(readFile idr) realHls)
+             Right idrContents <- readFile idr
+               | Left err => printLn err
+             Right texFile <- openFile tex WriteTruncate
+               | Left err => printLn err
+             fPutStr texFile (highlight LaTeX idrContents realHls)
              closeFile texFile
-             htmlFile <- openFile html Write
-             fwrite htmlFile (highlight HTML !(readFile idr) realHls)
+             Right htmlFile <- openFile html WriteTruncate
+               | Left err => printLn err
+             fPutStr htmlFile (highlight HTML idrContents realHls)
              closeFile htmlFile
         Right meta =>
           printLn meta
-

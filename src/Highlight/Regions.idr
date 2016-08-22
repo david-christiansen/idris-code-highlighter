@@ -1,20 +1,21 @@
 module Highlight.Regions
 
 ||| There are three types of global names that we will highlight
+public export
 data NameHL = Function | Constructor | TypeConstructor
 
-instance Show NameHL where
+Show NameHL where
   showPrec d Function = "Function"
   showPrec d Constructor = "Constructor"
   showPrec d TypeConstructor = "TypeConstructor"
 
-instance Eq NameHL where
+Eq NameHL where
   Function == Function = True
   Function == Constructor = True
   TypeConstructor == TypeConstructor = True
   _ == _ = False
 
-instance Ord NameHL where
+Ord NameHL where
   compare Function Function = EQ
   compare Function Constructor = LT
   compare Function TypeConstructor = LT
@@ -26,6 +27,7 @@ instance Ord NameHL where
   compare TypeConstructor TypeConstructor = EQ
 
 ||| Highlighting instructions
+public export
 data HighlightType : Type where
   ||| This is a name from the global context
   Name : NameHL -> (docstring : String) -> (type : String) -> HighlightType
@@ -34,13 +36,14 @@ data HighlightType : Type where
   ||| This is a language keyword (or part of a user syntax rule)
   Keyword : HighlightType
 
-instance Eq HighlightType where
+Eq HighlightType where
   (Name hl doc ty) == (Name hl' doc' ty') = hl == hl' && doc == doc' && ty == ty'
   (Bound b) == (Bound b') = b == b'
   Keyword == Keyword = True
   _ == _ = False
 
-instance Ord HighlightType where
+export
+Ord HighlightType where
   compare (Name x y z) (Name a b c) =
     case compare x a of
       LT => LT
@@ -58,7 +61,8 @@ instance Ord HighlightType where
   compare Keyword (Bound _) = GT
   compare Keyword Keyword = EQ
 
-instance Show HighlightType where
+export
+Show HighlightType where
     showPrec d (Name x docstring type) =
         showCon d "Name" $ showArg x ++ showArg docstring ++ showArg type
     showPrec d (Bound isImplicit) =
@@ -66,6 +70,7 @@ instance Show HighlightType where
     showPrec d Keyword = "Keyword"
 
 ||| Regions are spans in the source code
+public export
 record Region meta where
   constructor MkRegion
   fileName : String
@@ -75,18 +80,19 @@ record Region meta where
   endColumn : Integer
   metadata : meta
 
-instance Functor Region where
+export
+Functor Region where
   map f (MkRegion fn sl sc el ec meta) =
     MkRegion fn sl sc el ec (f meta)
 
-instance Show a => Show (Region a) where
+Show a => Show (Region a) where
   showPrec d x = showCon d "MkRegion" $
                    showArg (fileName x) ++
                    showArg (startLine x) ++ showArg (startColumn x) ++
                    showArg (endLine x) ++ showArg (endColumn x) ++
                    showArg (metadata x)
 
-instance Eq a => Eq (Region a) where
+Eq a => Eq (Region a) where
   r1 == r2 = fileName r1 == fileName r2 &&
              startLine r1 == startLine r2 &&
              startColumn r1 == startColumn r2 &&
@@ -94,11 +100,12 @@ instance Eq a => Eq (Region a) where
              endColumn r1 == endColumn r2 &&
              metadata r1 == metadata r2
 
-||| This Ord instance is important - we must sort regions in
+||| This Ord implementation is important - we must sort regions in
 ||| increasing order of start position, then increasing order of end
 ||| position. That means we can traverse them in order for opening and
 ||| use a stack to track end positions.
-instance Ord a => Ord (Region a) where
+export
+Ord a => Ord (Region a) where
   compare r1 r2 =
       case compare (fileName r1) (fileName r2) of
         LT => LT

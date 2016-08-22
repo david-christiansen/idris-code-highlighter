@@ -8,11 +8,13 @@ import Lightyear.Char
 import Lightyear.Strings
 
 ||| The data format output by Idris's highlighting routines
+public export
 data SExpr = SSym String | SString String | SInt Integer | SList (List SExpr)
 
 %name SExpr sexp
 
-instance Show SExpr where
+export
+Show SExpr where
   show (SSym x) = ":" ++ x
   show (SString x) = show x
   show (SInt x) = show x
@@ -30,7 +32,7 @@ sIntInj Refl = Refl
 sListInj : SList xs = SList ys -> xs = ys
 sListInj Refl = Refl
 
-instance DecEq SExpr where
+DecEq SExpr where
   decEq (SSym x) (SSym y) with (decEq x y)
     decEq (SSym x) (SSym x) | Yes Refl  = Yes Refl
     decEq (SSym x) (SSym y) | No contra = No $ contra . sSymInj
@@ -97,29 +99,29 @@ namespace Assoc
   assoc : (needle : SExpr) -> (haystack : List SExpr) -> Dec (value : List SExpr ** Assoc needle value haystack)
   assoc needle [] = No $ \(v ** prf) => noAssocEmpty prf
   assoc needle (SSym x :: xs) with (assoc needle xs)
-    assoc needle (SSym x :: xs) | Yes prf   = Yes (getWitness prf ** Cdr (getProof prf))
+    assoc needle (SSym x :: xs) | Yes prf   = Yes (fst prf ** Cdr (snd prf))
     assoc needle (SSym x :: xs) | No contra =
       No $ \(value ** location) =>
         contra (value ** assocConsNotList location (\(xs ** Refl) impossible))
   assoc needle (SString x :: xs) with (assoc needle xs)
-    assoc needle (SString x :: xs) | Yes prf   = Yes (getWitness prf ** Cdr (getProof prf))
+    assoc needle (SString x :: xs) | Yes prf   = Yes (fst prf ** Cdr (snd prf))
     assoc needle (SString x :: xs) | No contra =
       No $ \(value ** location) =>
         contra (value ** assocConsNotList location (\(xs ** Refl) impossible))
   assoc needle (SInt x :: xs) with (assoc needle xs)
-    assoc needle (SInt x :: xs) | Yes prf   = Yes (getWitness prf ** Cdr (getProof prf))
+    assoc needle (SInt x :: xs) | Yes prf   = Yes (fst prf ** Cdr (snd prf))
     assoc needle (SInt x :: xs) | No contra =
       No $ \(value ** location) =>
         contra (value ** assocConsNotList location (\(xs ** Refl) impossible))
   assoc needle (SList [] :: xs) with (assoc needle xs)
-    assoc needle (SList [] :: xs) | Yes prf   = Yes (getWitness prf ** Cdr (getProof prf))
+    assoc needle (SList [] :: xs) | Yes prf   = Yes (fst prf ** Cdr (snd prf))
     assoc needle (SList [] :: xs) | No contra =
       No $ \(value ** location) =>
         contra (value ** assocNonEmpty location)
   assoc needle (SList (y :: ys) :: xs) with (decEq needle y)
     assoc needle (SList (needle :: ys) :: xs) | Yes Refl = Yes (_ ** Car)
     assoc needle (SList (y :: ys) :: xs) | No notHere with (assoc needle xs)
-      assoc needle (SList (y :: ys) :: xs) | No notHere | Yes prf = Yes (getWitness prf ** Cdr (getProof prf))
+      assoc needle (SList (y :: ys) :: xs) | No notHere | Yes prf = Yes (fst prf ** Cdr (snd prf))
       assoc needle (SList (y :: ys) :: xs) | No notHere | No notThere =
         No $ \(value ** location) =>
           case location of
@@ -154,6 +156,7 @@ symbol : Parser String
 symbol = lexeme $ char ':' *> (pack <$> many symbolChar)
 
 ||| Parse a whole S-expression
+export
 expr : Parser SExpr
 expr =      SString <$> stringLit
        <|>| SSym <$> symbol
@@ -176,6 +179,7 @@ getRegion (SList xs) = do ([SString fn] ** _) <- decToMaybe (assoc (SSym "filena
                           return (MkRegion fn sl sc el ec ())
 getRegion _ = Nothing
 
+export
 getRegionMeta : SExpr -> Maybe (Region SExpr)
 getRegionMeta (SList [r, meta]) = map (const meta) <$> getRegion r
 getRegionMeta _ = Nothing
@@ -204,6 +208,7 @@ getHighlightType (SList xs) = do ([SSym d] ** _) <- decToMaybe (assoc (SSym "dec
                         _ => ""
 getHighlightType _ = Nothing
 
+export
 mkHls : List (Region SExpr) -> List (Region HighlightType)
 mkHls [] = []
 mkHls (r::rs) = case getHighlightType (metadata r) of

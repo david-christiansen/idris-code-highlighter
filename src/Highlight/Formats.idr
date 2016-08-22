@@ -6,7 +6,7 @@ import Control.Monad.State
 import Debug.Trace
 
 ||| A description of how to annotate a source file to output to a particular format.
-public
+public export
 record Format where
   constructor MkFormat
   openTag   : HighlightType -> String
@@ -62,7 +62,7 @@ postambleL =
 \end{document}
 """
 
-public total
+export total
 LaTeX : Format
 LaTeX = MkFormat openTagL closeTagL escapeL preambleL postambleL
 
@@ -102,7 +102,7 @@ escapeH '<' = "&lt;"
 escapeH '>' = "&gt;"
 escapeH c = singleton c
 
-public total
+export total
 HTML : Format
 HTML = MkFormat openTagH closeTagH escapeH preambleH postambleH
 
@@ -158,7 +158,7 @@ closeAll line col fmt =
 
 
 ||| Apply highlighting to a source file for some output format
-public
+export
 highlight : Format -> (fileContents : String) -> List (Region HighlightType) -> String
 highlight fmt fileContents hls =
     preamble fmt ++
@@ -180,4 +180,3 @@ highlight fmt fileContents hls =
                                       modify (record {colNo = 0})
                                       doOutput "\n"
                                       highlight' lines (unpack l)
-
