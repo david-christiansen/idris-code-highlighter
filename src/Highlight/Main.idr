@@ -35,23 +35,23 @@ doHighlight : (outputFile : String) ->
               (src        : String) ->
               (highlights : List (Region HighlightType)) ->
               Eff (IO ()) [FILE ()]
-doHighlight outputFile format src highlights = do
-  Success <- writeFile outputFile (highlight format src highlights)
-    | FError err => pure (printLn err)
-  pure (pure ())
+doHighlight outputFile format src highlights =
+  do Success <- writeFile outputFile (highlight format src highlights)
+       | FError err => pure (printLn err)
+     pure (pure ())
 
 ||| Generate `basename`.tex and `basename`.html via `doHighlight`.
 doHighlights : (basename : String) -> Eff (IO ()) [FILE ()]
-doHighlights bn = do
-  Result info <- readFile (bn ++ ".idh") | FError err => pure (printLn err)
-  case parse expr info of
-    Left err => pure (putStrLn err)
-    Right (SList xs) => do
-      let idr = bn ++ ".idr"
-      Result src <- readFile idr | FError err => pure (printLn err)
-      let hls = sortedHighlights idr xs
-      doHighlight (bn ++ ".tex")  LaTeX src hls
-      doHighlight (bn ++ ".html") HTML  src hls
+doHighlights bn =
+  do Result info <- readFile (bn ++ ".idh") | FError err => pure (printLn err)
+     case parse expr info of
+       Left err => pure (putStrLn err)
+       Right (SList xs) =>
+         do let idr = bn ++ ".idr"
+            Result src <- readFile idr | FError err => pure (printLn err)
+            let hls = sortedHighlights idr xs
+            doHighlight (bn ++ ".tex")  LaTeX src hls
+            doHighlight (bn ++ ".html") HTML  src hls
 
 -------------------------
 -- File Name Manipulation
@@ -72,8 +72,8 @@ getBasename : IO (Maybe String)
 getBasename = map (map basename) getFilename
 
 main : IO ()
-main = do
-  Just basename <- getBasename | _ => usage
-  run (doHighlights basename)
-  putStrLn ("Processed " ++ basename)
+main =
+  do Just basename <- getBasename | _ => usage
+     run (doHighlights basename)
+     putStrLn ("Processed " ++ basename)
 
