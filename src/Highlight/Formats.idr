@@ -62,6 +62,7 @@ postambleL =
 \end{document}
 """
 
+||| LaTeX-style highlights
 export total
 LaTeX : Format
 LaTeX = MkFormat openTagL closeTagL escapeL preambleL postambleL
@@ -102,6 +103,7 @@ escapeH '<' = "&lt;"
 escapeH '>' = "&gt;"
 escapeH c = singleton c
 
+||| HTML-style highlights
 export total
 HTML : Format
 HTML = MkFormat openTagH closeTagH escapeH preambleH postambleH
@@ -145,6 +147,7 @@ openAll line col fmt =
                    , openHighlights = reverse toOpen ++ openHighlights st
                    } st)
 
+||| Close all currently-open highlights
 closeAll : (line, col : Integer) -> Format -> State HLState ()
 closeAll line col fmt =
     do openHls <- openHighlights <$> get

@@ -11,6 +11,7 @@ import Lightyear.Strings
 -- Usage Instructions
 ---------------------
 
+||| Print usage instructions
 usage : IO ()
 usage = putStrLn "Usage:" *>
         putStrLn "highlight-idris BASENAME" *>
@@ -21,9 +22,14 @@ usage = putStrLn "Usage:" *>
 -- Highlighting
 ---------------
 
-sortedHighlights : String -> List SExpr -> List (Region HighlightType)
-sortedHighlights file xs = sort $ filter ((== file) . fileName) $
-                           mkHls $ catMaybes $ map getRegionMeta xs
+||| Extract a sorted list of highlights from a parsed Idris highlight file
+||| @ file the filename to which highlights apply
+||| @ hls the highlighting information
+sortedHighlights : (file : String) ->
+                   (hls  : List SExpr) ->
+                   List (Region HighlightType)
+sortedHighlights file hls = sort $ filter ((== file) . fileName) $
+                            mkHls $ catMaybes $ map getRegionMeta hls
 
 ||| Highlight `src` in `format` using `highlights` and write to `outputFile`.
 ||| @ outputFile The file to which to write the formatted highlights.
@@ -54,20 +60,23 @@ doHighlights bn =
             doHighlight (bn ++ ".html") HTML  src hls
 
 -------------------------
--- File Name Manipulation
+-- Figuring out filenames
 -------------------------
 
+||| Get the file name from the command line arguments.
 getFilename : IO (Maybe String)
 getFilename = case !getArgs of
                 [prog, filename] => return (Just filename)
                 _                => return Nothing
 
+||| Strip the ".idh" extension from a file's name.
 basename : (file : String) -> String
 basename file =
   if isSuffixOf ".idh" file
     then pack (reverse (drop 4 (reverse (unpack file))))
     else file
 
+||| Get the base filename from the command line arguments.
 getBasename : IO (Maybe String)
 getBasename = map (map basename) getFilename
 
