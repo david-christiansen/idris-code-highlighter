@@ -19,7 +19,7 @@ clean:
 	@find src \! -name "*.idr" -type f -delete
 
 highlight: idrishl
-	@cd src && $(foreach idh,$(IDH_SRCS),../idrishl $(idh);)
+	@cd src && $(foreach idh,$(IDH_SRCS),../idrishl ./$(idh);)
 
 install:
 	$(IDRIS) --install $(IPKG)
