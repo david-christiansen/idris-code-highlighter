@@ -53,12 +53,14 @@ doHighlight outputFile format src highlights =
 ||| Generate `basename`.tex and `basename`.html via `doHighlight`.
 doHighlights : (basename : String) -> Eff (IO ()) [FILE ()]
 doHighlights bn =
-    do Result info <- readFile (bn ++ ".idh") | FError err => pure (printLn err)
+    do Result info <- readFile (bn ++ ".idh")
+         | FError err => pure (printLn err)
        case parse expr info of
          Left err => pure (putStrLn err)
          Right (SList xs) =>
            do let idr = bn ++ ".idr"
-              Result src <- readFile idr | FError err => pure (printLn err)
+              Result src <- readFile idr
+                | FError err => pure (printLn err)
               let hls = sortedHighlights idr xs
               doHighlight (bn ++ ".tex")  LaTeX src hls
               doHighlight (bn ++ ".html") HTML  src hls
