@@ -7,7 +7,9 @@ import Highlight.Regions
 import Highlight.Formats
 import Lightyear.Strings
 
----------------------------------------------------------------------- [ Usage ]
+---------------------
+-- Usage Instructions
+---------------------
 
 usage : IO ()
 usage = putStrLn "Usage:"
@@ -15,7 +17,9 @@ usage = putStrLn "Usage:"
      *> putStr   "where BASENAME.idr and BASENAME.idh both exist. "
      *> putStrLn "The output will be BASENAME.tex and BASENAME.html."
 
---------------------------------------------------------------- [ Highlighting ]
+---------------
+-- Highlighting
+---------------
 
 sortedHighlights : String -> List SExpr -> List (Region HighlightType)
 sortedHighlights file xs = sort $ filter ((== file) . fileName)
@@ -49,7 +53,9 @@ doHighlights bn = do
       doHighlight (bn ++ ".tex")  LaTeX src hls
       doHighlight (bn ++ ".html") HTML  src hls
 
------------------------------------------------------- [ Filename manipulation ]
+-------------------------
+-- File Name Manipulation
+-------------------------
 
 getFilename : IO (Maybe String)
 getFilename = case !getArgs of
@@ -71,4 +77,3 @@ main = do
   run (doHighlights basename)
   putStrLn ("Processed " ++ basename)
 
------------------------------------------------------------------------- [ EOF ]
