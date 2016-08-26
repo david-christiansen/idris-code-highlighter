@@ -17,6 +17,10 @@ usage = putStrLn "Usage:"
 
 --------------------------------------------------------------- [ Highlighting ]
 
+sortedHighlights : String -> List SExpr -> List (Region HighlightType)
+sortedHighlights file xs = sort $ filter ((== file) . fileName)
+                         $ mkHls $ catMaybes $ map getRegionMeta xs
+
 ||| Highlight `src` in `format` using `highlights` and write to `outputFile`.
 ||| @ outputFile The file to which to write the formatted highlights.
 ||| @ format     The output `Format`.
@@ -39,12 +43,11 @@ doHighlights bn = do
   case parse expr info of
     Left err => pure (putStrLn err)
     Right (SList xs) => do
-      let hls     = mkHls $ catMaybes $ map getRegionMeta xs
-      let idr     = bn ++ ".idr"
-      let realHls = sort (filter ((== idr) . fileName) hls)
+      let idr = bn ++ ".idr"
       Result src <- readFile idr | FError err => pure (printLn err)
-      doHighlight (bn ++ ".tex")  LaTeX src realHls
-      doHighlight (bn ++ ".html") HTML  src realHls
+      let hls = sortedHighlights idr xs
+      doHighlight (bn ++ ".tex")  LaTeX src hls
+      doHighlight (bn ++ ".html") HTML  src hls
 
 ------------------------------------------------------ [ Filename manipulation ]
 
