@@ -4,24 +4,24 @@ module Highlight.Regions
 public export
 data NameHL = Function | Constructor | TypeConstructor
 
-Show NameHL where
+implementation Show NameHL where
   showPrec d Function = "Function"
   showPrec d Constructor = "Constructor"
   showPrec d TypeConstructor = "TypeConstructor"
 
-Eq NameHL where
-  Function == Function = True
-  Function == Constructor = True
+implementation Eq NameHL where
+  Function        == Function        = True
+  Function        == Constructor     = True
   TypeConstructor == TypeConstructor = True
-  _ == _ = False
+  _               == _               = False
 
-Ord NameHL where
-  compare Function Function = EQ
-  compare Function Constructor = LT
-  compare Function TypeConstructor = LT
-  compare Constructor Function = GT
-  compare Constructor Constructor = EQ
-  compare Constructor TypeConstructor = LT
+implementation Ord NameHL where
+  compare Function        Function = EQ
+  compare Function        Constructor = LT
+  compare Function        TypeConstructor = LT
+  compare Constructor     Function = GT
+  compare Constructor     Constructor = EQ
+  compare Constructor     TypeConstructor = LT
   compare TypeConstructor Function = GT
   compare TypeConstructor Constructor = GT
   compare TypeConstructor TypeConstructor = EQ
@@ -36,14 +36,14 @@ data HighlightType : Type where
   ||| This is a language keyword (or part of a user syntax rule)
   Keyword : HighlightType
 
-Eq HighlightType where
+implementation Eq HighlightType where
   (Name hl doc ty) == (Name hl' doc' ty') = hl == hl' && doc == doc' && ty == ty'
   (Bound b) == (Bound b') = b == b'
   Keyword == Keyword = True
   _ == _ = False
 
 export
-Ord HighlightType where
+implementation Ord HighlightType where
   compare (Name x y z) (Name a b c) =
     case compare x a of
       LT => LT
@@ -52,17 +52,17 @@ Ord HighlightType where
               LT => LT
               GT => GT
               EQ => compare z c
-  compare (Name x y z) (Bound _) = LT
-  compare (Name x y z) Keyword = LT
-  compare (Bound _) (Name _ _ _) = GT
-  compare (Bound x) (Bound y) = compare x y
-  compare (Bound _) Keyword = LT
-  compare Keyword (Name _ _ _) = GT
-  compare Keyword (Bound _) = GT
-  compare Keyword Keyword = EQ
+  compare (Name x y z) (Bound _)    = LT
+  compare (Name x y z) Keyword      = LT
+  compare (Bound _)    (Name _ _ _) = GT
+  compare (Bound x)    (Bound y)    = compare x y
+  compare (Bound _)    Keyword      = LT
+  compare Keyword      (Name _ _ _) = GT
+  compare Keyword      (Bound _)    = GT
+  compare Keyword      Keyword      = EQ
 
 export
-Show HighlightType where
+implementation Show HighlightType where
     showPrec d (Name x docstring type) =
         showCon d "Name" $ showArg x ++ showArg docstring ++ showArg type
     showPrec d (Bound isImplicit) =
@@ -73,39 +73,40 @@ Show HighlightType where
 public export
 record Region meta where
   constructor MkRegion
-  fileName : String
-  startLine : Integer
+  fileName    : String
+  startLine   : Integer
   startColumn : Integer
-  endLine : Integer
-  endColumn : Integer
-  metadata : meta
+  endLine     : Integer
+  endColumn   : Integer
+  metadata    : meta
 
 export
-Functor Region where
+implementation Functor Region where
   map f (MkRegion fn sl sc el ec meta) =
     MkRegion fn sl sc el ec (f meta)
 
-Show a => Show (Region a) where
+export
+implementation Show a => Show (Region a) where
   showPrec d x = showCon d "MkRegion" $
                    showArg (fileName x) ++
                    showArg (startLine x) ++ showArg (startColumn x) ++
                    showArg (endLine x) ++ showArg (endColumn x) ++
                    showArg (metadata x)
 
-Eq a => Eq (Region a) where
-  r1 == r2 = fileName r1 == fileName r2 &&
-             startLine r1 == startLine r2 &&
+implementation Eq a => Eq (Region a) where
+  r1 == r2 = fileName r1    == fileName r2 &&
+             startLine r1   == startLine r2 &&
              startColumn r1 == startColumn r2 &&
-             endLine r1 == endLine r2 &&
-             endColumn r1 == endColumn r2 &&
-             metadata r1 == metadata r2
+             endLine r1     == endLine r2 &&
+             endColumn r1   == endColumn r2 &&
+             metadata r1    == metadata r2
 
 ||| This Ord implementation is important - we must sort regions in
 ||| increasing order of start position, then increasing order of end
 ||| position. That means we can traverse them in order for opening and
 ||| use a stack to track end positions.
 export
-Ord a => Ord (Region a) where
+implementation Ord a => Ord (Region a) where
   compare r1 r2 =
       case compare (fileName r1) (fileName r2) of
         LT => LT
