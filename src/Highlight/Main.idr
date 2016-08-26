@@ -12,29 +12,29 @@ import Lightyear.Strings
 ---------------------
 
 usage : IO ()
-usage = putStrLn "Usage:"
-     *> putStrLn "highlight-idris BASENAME"
-     *> putStr   "where BASENAME.idr and BASENAME.idh both exist. "
-     *> putStrLn "The output will be BASENAME.tex and BASENAME.html."
+usage = putStrLn "Usage:" *>
+        putStrLn "highlight-idris BASENAME" *>
+        putStr   "where BASENAME.idr and BASENAME.idh both exist. " *>
+        putStrLn "The output will be BASENAME.tex and BASENAME.html."
 
 ---------------
 -- Highlighting
 ---------------
 
 sortedHighlights : String -> List SExpr -> List (Region HighlightType)
-sortedHighlights file xs = sort $ filter ((== file) . fileName)
-                         $ mkHls $ catMaybes $ map getRegionMeta xs
+sortedHighlights file xs = sort $ filter ((== file) . fileName) $
+                           mkHls $ catMaybes $ map getRegionMeta xs
 
 ||| Highlight `src` in `format` using `highlights` and write to `outputFile`.
 ||| @ outputFile The file to which to write the formatted highlights.
 ||| @ format     The output `Format`.
 ||| @ src        The contents of the Idris source file.
 ||| @ highlights A list of highlights for `src`.
-doHighlight : (outputFile : String)
-           -> (format     : Format)
-           -> (src        : String)
-           -> (highlights : List (Region HighlightType))
-           -> Eff (IO ()) [FILE ()]
+doHighlight : (outputFile : String) ->
+              (format     : Format) ->
+              (src        : String) ->
+              (highlights : List (Region HighlightType)) ->
+              Eff (IO ()) [FILE ()]
 doHighlight outputFile format src highlights = do
   Success <- writeFile outputFile (highlight format src highlights)
     | FError err => pure (printLn err)
