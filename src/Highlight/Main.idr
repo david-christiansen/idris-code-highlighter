@@ -42,22 +42,22 @@ doHighlight : (outputFile : String) ->
               (highlights : List (Region HighlightType)) ->
               Eff (IO ()) [FILE ()]
 doHighlight outputFile format src highlights =
-  do Success <- writeFile outputFile (highlight format src highlights)
-       | FError err => pure (printLn err)
-     pure (pure ())
+    do Success <- writeFile outputFile (highlight format src highlights)
+         | FError err => pure (printLn err)
+       pure (pure ())
 
 ||| Generate `basename`.tex and `basename`.html via `doHighlight`.
 doHighlights : (basename : String) -> Eff (IO ()) [FILE ()]
 doHighlights bn =
-  do Result info <- readFile (bn ++ ".idh") | FError err => pure (printLn err)
-     case parse expr info of
-       Left err => pure (putStrLn err)
-       Right (SList xs) =>
-         do let idr = bn ++ ".idr"
-            Result src <- readFile idr | FError err => pure (printLn err)
-            let hls = sortedHighlights idr xs
-            doHighlight (bn ++ ".tex")  LaTeX src hls
-            doHighlight (bn ++ ".html") HTML  src hls
+    do Result info <- readFile (bn ++ ".idh") | FError err => pure (printLn err)
+       case parse expr info of
+         Left err => pure (putStrLn err)
+         Right (SList xs) =>
+           do let idr = bn ++ ".idr"
+              Result src <- readFile idr | FError err => pure (printLn err)
+              let hls = sortedHighlights idr xs
+              doHighlight (bn ++ ".tex")  LaTeX src hls
+              doHighlight (bn ++ ".html") HTML  src hls
 
 -------------------------
 -- Figuring out filenames
@@ -72,9 +72,9 @@ getFilename = case !getArgs of
 ||| Strip the ".idh" extension from a file's name.
 basename : (file : String) -> String
 basename file =
-  if isSuffixOf ".idh" file
-    then pack (reverse (drop 4 (reverse (unpack file))))
-    else file
+    if isSuffixOf ".idh" file
+      then pack (reverse (drop 4 (reverse (unpack file))))
+      else file
 
 ||| Get the base filename from the command line arguments.
 getBasename : IO (Maybe String)
@@ -82,7 +82,7 @@ getBasename = map (map basename) getFilename
 
 main : IO ()
 main =
-  do Just basename <- getBasename | _ => usage
-     run (doHighlights basename)
-     putStrLn ("Processed " ++ basename)
+    do Just basename <- getBasename | _ => usage
+       run (doHighlights basename)
+       putStrLn ("Processed " ++ basename)
 
