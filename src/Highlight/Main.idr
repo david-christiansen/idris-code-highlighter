@@ -72,8 +72,8 @@ doHighlights bn =
 ||| Get the file name from the command line arguments.
 getFilename : IO (Maybe String)
 getFilename = case !getArgs of
-                [prog, filename] => return (Just filename)
-                _                => return Nothing
+                [prog, filename] => pure (Just filename)
+                _                => pure Nothing
 
 ||| Strip the ".idh" extension from a file's name.
 basename : (file : String) -> String

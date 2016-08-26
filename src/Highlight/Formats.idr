@@ -170,7 +170,7 @@ highlight fmt fileContents hls =
   where highlight' : List String -> List Char -> State HLState (List String)
         highlight' [] [] =
             do traverse_ (doOutput . closeTag fmt . metadata) (openHighlights !get)
-               return (reverse (output !get))
+               pure (reverse (output !get))
         highlight' lines (c::cs) =
             do modify incCol
                line <- lineNo <$> get

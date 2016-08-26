@@ -2,6 +2,10 @@
 
 ## Code Style Guidelines ##
 
+### Use pure ###
+
+Never write `return`. Instead, write `pure`. They're always equivalent in Idris.
+
 ### Do as an Expression  ###
 
 `do`-expressions are expressions, so please don't stick the `do` alone by itself to hang out.
