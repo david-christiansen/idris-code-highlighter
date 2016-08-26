@@ -28,8 +28,12 @@ usage = putStrLn "Usage:" *>
 sortedHighlights : (file : String) ->
                    (hls  : List SExpr) ->
                    List (Region HighlightType)
-sortedHighlights file hls = sort $ filter ((== file) . fileName) $
-                            mkHls $ catMaybes $ map getRegionMeta hls
+sortedHighlights file hls =
+    let metadata = map getRegionMeta hls
+        successfulMetadata = catMaybes metadata
+        hls = mkHls successfulMetadata
+        forThisFile = filter ((== file) . fileName) hls
+    in sort forThisFile
 
 ||| Highlight `src` in `format` using `highlights` and write to `outputFile`.
 ||| @ outputFile The file to which to write the formatted highlights.
