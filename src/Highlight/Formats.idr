@@ -168,18 +168,21 @@ highlight fmt fileContents hls =
     concat (evalState (highlight' (split isNL fileContents) []) (MkHlState 0 0 (sort hls) [] [])) ++
     postamble fmt
   where highlight' : List String -> List Char -> State HLState (List String)
-        highlight' [] [] = do traverse_ (doOutput . closeTag fmt . metadata) (openHighlights !get)
-                              return (reverse (output !get))
-        highlight' lines (c::cs) = do modify incCol
-                                      line <- lineNo <$> get
-                                      col <- colNo <$> get
-                                      openAll line col fmt
-                                      closeAll line col fmt
-                                      doOutput $ escape fmt c
-                                      highlight' lines cs
-        highlight' (l::lines) [] = do modify incCol
-                                      closeAll (lineNo !get) (colNo !get) fmt
-                                      modify incLine
-                                      modify (record {colNo = 0})
-                                      doOutput "\n"
-                                      highlight' lines (unpack l)
+        highlight' [] [] =
+            do traverse_ (doOutput . closeTag fmt . metadata) (openHighlights !get)
+               return (reverse (output !get))
+        highlight' lines (c::cs) =
+            do modify incCol
+               line <- lineNo <$> get
+               col <- colNo <$> get
+               openAll line col fmt
+               closeAll line col fmt
+               doOutput $ escape fmt c
+               highlight' lines cs
+        highlight' (l::lines) [] =
+            do modify incCol
+               closeAll (lineNo !get) (colNo !get) fmt
+               modify incLine
+               modify (record {colNo = 0})
+               doOutput "\n"
+               highlight' lines (unpack l)
