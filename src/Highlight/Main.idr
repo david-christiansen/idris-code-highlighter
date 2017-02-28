@@ -31,9 +31,12 @@ sortedHighlights : (file : String) ->
 sortedHighlights file hls =
     let metadata = map getRegionMeta hls
         successfulMetadata = catMaybes metadata
-        hls = mkHls successfulMetadata
-        forThisFile = filter ((== file) . fileName) hls
+        regs = mkHls successfulMetadata
+        forThisFile = filter (sameFile file) regs
     in sort forThisFile
+  where
+    sameFile : String -> Region HighlightType -> Bool
+    sameFile fname reg = (fileName reg) == fname || (fileName reg) == ("./" ++ fname)
 
 ||| Highlight `src` in `format` using `highlights` and write to `outputFile`.
 ||| @ outputFile The file to which to write the formatted highlights.
@@ -91,4 +94,3 @@ main =
     do Just basename <- getBasename | _ => usage
        run (doHighlights basename)
        putStrLn ("Processed " ++ basename)
-
