@@ -176,7 +176,7 @@ getRegion (SList xs) = do ([SString fn] ** _) <- decToMaybe (assoc (SSym "filena
                             | _ => Nothing
                           ([SInt el, SInt ec] ** _) <- decToMaybe (assoc (SSym "end") xs)
                             | _ => Nothing
-                          pure (MkRegion fn sl sc el ec ())
+                          pure (MkRegion fn sl sc el (1 + ec) ())
 getRegion _ = Nothing
 
 export
